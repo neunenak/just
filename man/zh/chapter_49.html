@@ -4,7 +4,10 @@
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>安静配方 - Just 用户指南</title>
+
+
         <!-- Custom HTML head -->
+        
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -15,15 +18,18 @@
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
         <link rel="stylesheet" href="css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+
     </head>
     <body>
         <!-- Provide site root to javascript -->
@@ -82,7 +88,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -112,6 +118,7 @@
                         <a href="https://github.com/casey/just" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -125,6 +132,7 @@
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -138,7 +146,7 @@
                     <main>
                         <h3 id="安静配方"><a class="header" href="#安静配方">安静配方</a></h3>
 <p>配方名称可在前面加上 <code>@</code>，可以在每行反转行首 <code>@</code> 的含义：</p>
-<pre><code class="language-make">@quiet:
+<pre><code class="language-just">@quiet:
   echo hello
   echo goodbye
   @# all done!
@@ -150,7 +158,7 @@ goodbye
 # all done!
 </code></pre>
 <p>Shebang 配方默认是安静的：</p>
-<pre><code class="language-make">foo:
+<pre><code class="language-just">foo:
   #!/usr/bin/env bash
   echo 'Foo!'
 </code></pre>
@@ -158,7 +166,7 @@ goodbye
 Foo!
 </code></pre>
 <p>在 Shebang 配方名称前面添加 <code>@</code>，使 <code>just</code> 在执行配方前打印该配方：</p>
-<pre><code class="language-make">@bar:
+<pre><code class="language-just">@bar:
   #!/usr/bin/env bash
   echo 'Bar!'
 </code></pre>
@@ -168,7 +176,7 @@ echo 'Bar!'
 Bar!
 </code></pre>
 <p><code>just</code> 在配方行失败时通常会打印错误信息，这些错误信息可以通过 <code>[no-exit-message]</code> 属性来抑制。你可能会发现这在包装工具的配方中特别有用：</p>
-<pre><code class="language-make">git *args:
+<pre><code class="language-just">git *args:
     @git {{args}}
 </code></pre>
 <pre><code class="language-sh">$ just git status
@@ -176,7 +184,7 @@ fatal: not a git repository (or any of the parent directories): .git
 error: Recipe `git` failed on line 2 with exit code 128
 </code></pre>
 <p>添加属性，当工具以非零代码退出时抑制退出错误信息：</p>
-<pre><code class="language-make">[no-exit-message]
+<pre><code class="language-just">[no-exit-message]
 git *args:
     @git {{args}}
 </code></pre>
@@ -191,9 +199,11 @@ fatal: not a git repository (or any of the parent directories): .git
                             <a rel="prev" href="chapter_48.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
+
                             <a rel="next" href="chapter_50.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
@@ -203,6 +213,7 @@ fatal: not a git repository (or any of the parent directories): .git
                     <a rel="prev" href="chapter_48.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
+
                     <a rel="next" href="chapter_50.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
@@ -210,16 +221,24 @@ fatal: not a git repository (or any of the parent directories): .git
 
         </div>
 
+
+
+
         <script>
             window.playground_copyable = true;
         </script>
+
+
         <script src="elasticlunr.min.js"></script>
         <script src="mark.min.js"></script>
         <script src="searcher.js"></script>
+
         <script src="clipboard.min.js"></script>
         <script src="highlight.js"></script>
         <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
+
+
     </body>
 </html>
