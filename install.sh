@@ -19,7 +19,7 @@ FLAGS:
 
 OPTIONS:
     --tag TAG       Tag (version) of the crate to install, defaults to latest release
-    --to LOCATION   Where to install the binary [default: ~/.cargo/bin]
+    --to LOCATION   Where to install the binary [default: ~/bin]
     --target TARGET
 EOF
 }
@@ -98,11 +98,11 @@ if [ -z ${target-} ]; then
 fi
 
 if [ -z ${dest-} ]; then
-  dest="$HOME/.cargo/bin"
+  dest="$HOME/bin"
 fi
 
 if [ -z ${tag-} ]; then
-  tag=$(curl --proto =https --tlsv1.3 -sSf https://api.github.com/repos/casey/just/releases/latest |
+  tag=$(curl --proto =https --tlsv1.2 -sSf https://api.github.com/repos/casey/just/releases/latest |
     grep tag_name |
     cut -d'"' -f4
   )
@@ -147,10 +147,10 @@ td=$(mktemp -d || mktemp -d -t tmp)
 
 if [ "$extension" = "zip" ]; then
     # unzip on windows cannot always handle stdin, so download first.
-    curl --proto =https --tlsv1.3 -sSfL $archive > $td/just.zip
+    curl --proto =https --tlsv1.2 -sSfL $archive > $td/just.zip
     unzip -d $td $td/just.zip
 else
-    curl --proto =https --tlsv1.3 -sSfL $archive | tar -C $td -xz
+    curl --proto =https --tlsv1.2 -sSfL $archive | tar -C $td -xz
 fi
 
 for f in $(ls $td); do
