@@ -2,6 +2,23 @@ use super::*;
 
 const WIDTH_LIMIT: usize = 30;
 
+pub (crate) fn list_recipes_compact(config: &Config, justfile: &Justfile) {
+  let recipe_aliases = build_alias_table(&justfile);
+  println!("YOLO");
+
+  for recipe in justfile.public_recipes(config.unsorted) {
+    let name = recipe.name();
+    let aliases = recipe_aliases.get(name);
+
+    print_recipe_compact(recipe, aliases);
+  }
+}
+
+fn print_recipe_compact(recipe: &Recipe, aliases: Option<&Vec<&str>>) {
+  let name = recipe.name();
+  println!("{}", name);
+}
+
 pub(crate) fn list_recipes_expanded(config: &Config, justfile: &Justfile) {
   let recipe_aliases = build_alias_table(&justfile);
   let line_widths = build_line_widths_table(&justfile, &recipe_aliases);

@@ -426,7 +426,11 @@ impl Subcommand {
   }
 
   fn list(config: &Config, justfile: Justfile) {
-    crate::list_recipes::list_recipes_expanded(config, &justfile);
+    if config.compact {
+      crate::list_recipes::list_recipes_compact(config, &justfile);
+    } else {
+      crate::list_recipes::list_recipes_expanded(config, &justfile);
+    }
   }
 
   fn show<'src>(config: &Config, name: &str, justfile: Justfile<'src>) -> Result<(), Error<'src>> {

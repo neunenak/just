@@ -16,6 +16,7 @@ pub(crate) struct Config {
   pub(crate) check: bool,
   pub(crate) color: Color,
   pub(crate) command_color: Option<ansi_term::Color>,
+  pub(crate) compact: bool,
   pub(crate) dotenv_filename: Option<String>,
   pub(crate) dotenv_path: Option<PathBuf>,
   pub(crate) dry_run: bool,
@@ -94,6 +95,7 @@ mod arg {
   pub(crate) const DUMP_FORMAT: &str = "DUMP-FORMAT";
   pub(crate) const HIGHLIGHT: &str = "HIGHLIGHT";
   pub(crate) const JUSTFILE: &str = "JUSTFILE";
+  pub(crate) const LIST_COMPACT: &str = "LIST-COMPACT";
   pub(crate) const LIST_HEADING: &str = "LIST-HEADING";
   pub(crate) const LIST_PREFIX: &str = "LIST-PREFIX";
   pub(crate) const NO_DOTENV: &str = "NO-DOTENV";
@@ -193,6 +195,10 @@ impl Config {
           .help("Highlight echoed recipe lines in bold")
           .overrides_with(arg::NO_HIGHLIGHT),
       )
+      .arg(Arg::with_name(arg::LIST_COMPACT)
+           .long("list-compact")
+           .help("Print list in compact form")
+        )
       .arg(
         Arg::with_name(arg::LIST_HEADING)
           .long("list-heading")
@@ -623,10 +629,13 @@ impl Config {
         .map(|val| !(val == "false" || val == "0" || val.is_empty()))
         .unwrap_or_default();
 
+    let compact = matches.is_present(arg::LIST_COMPACT);
+
     Ok(Self {
       check: matches.is_present(arg::CHECK),
       color,
       command_color,
+      compact,
       dotenv_filename: matches.value_of(arg::DOTENV_FILENAME).map(str::to_owned),
       dotenv_path: matches.value_of(arg::DOTENV_PATH).map(PathBuf::from),
       dry_run: matches.is_present(arg::DRY_RUN),
