@@ -433,13 +433,13 @@ impl Subcommand {
         continue;
       }
 
-      if recipe_aliases.contains_key(alias.target.name.lexeme()) {
-        let aliases = recipe_aliases.get_mut(alias.target.name.lexeme()).unwrap();
-        aliases.push(alias.name.lexeme());
-      } else {
-        recipe_aliases.insert(alias.target.name.lexeme(), vec![alias.name.lexeme()]);
-      }
+      let target_name = alias.target.name.lexeme();
+      let alias_name = alias.name.lexeme();
+      recipe_aliases.entry(target_name)
+        .and_modify(|e| e.push(alias_name))
+        .or_insert_with(|| vec![alias_name]);
     }
+    let recipe_aliases = recipe_aliases;
 
     let mut line_widths: BTreeMap<&str, usize> = BTreeMap::new();
 
