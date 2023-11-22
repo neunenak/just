@@ -68,6 +68,8 @@ impl<'src, 'run> Evaluator<'src, 'run> {
       Expression::Call { thunk } => {
         use Thunk::*;
 
+        //TODO needs to have cur and root justfiles
+        //so evaluator needs to provide it
         let context = FunctionContext {
           dotenv: self.dotenv,
           invocation_directory: &self.config.invocation_directory,

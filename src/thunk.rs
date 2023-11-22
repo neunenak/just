@@ -56,65 +56,64 @@ impl<'src> Thunk<'src> {
     name: Name<'src>,
     mut arguments: Vec<Expression<'src>>,
   ) -> CompileResult<'src, Thunk<'src>> {
-    function::get(name.lexeme()).map_or(
-      Err(name.error(CompileErrorKind::UnknownFunction {
-        function: name.lexeme(),
-      })),
-      |function| match (function, arguments.len()) {
-        (Function::Nullary(function), 0) => Ok(Thunk::Nullary { function, name }),
-        (Function::Unary(function), 1) => Ok(Thunk::Unary {
+    let fn_name = name.lexeme();
+    let function = function::get(fn_name)
+      .ok_or(name.error(CompileErrorKind::UnknownFunction { function: fn_name }))?;
+
+    match (function, arguments.len()) {
+      (Function::Nullary(function), 0) => Ok(Thunk::Nullary { function, name }),
+      (Function::Unary(function), 1) => Ok(Thunk::Unary {
+        function,
+        arg: Box::new(arguments.pop().unwrap()),
+        name,
+      }),
+      (Function::UnaryOpt(function), 1..=2) => {
+        let a = Box::new(arguments.remove(0));
+        let b = match arguments.pop() {
+          Some(value) => Box::new(Some(value)),
+          None => Box::new(None),
+        };
+        Ok(Thunk::UnaryOpt {
           function,
-          arg: Box::new(arguments.pop().unwrap()),
+          args: (a, b),
           name,
-        }),
-        (Function::UnaryOpt(function), 1..=2) => {
-          let a = Box::new(arguments.remove(0));
-          let b = match arguments.pop() {
-            Some(value) => Box::new(Some(value)),
-            None => Box::new(None),
-          };
-          Ok(Thunk::UnaryOpt {
-            function,
-            args: (a, b),
-            name,
-          })
-        }
-        (Function::Binary(function), 2) => {
-          let b = Box::new(arguments.pop().unwrap());
-          let a = Box::new(arguments.pop().unwrap());
-          Ok(Thunk::Binary {
-            function,
-            args: [a, b],
-            name,
-          })
-        }
-        (Function::BinaryPlus(function), 2..=usize::MAX) => {
-          let rest = arguments.drain(2..).collect();
-          let b = Box::new(arguments.pop().unwrap());
-          let a = Box::new(arguments.pop().unwrap());
-          Ok(Thunk::BinaryPlus {
-            function,
-            args: ([a, b], rest),
-            name,
-          })
-        }
-        (Function::Ternary(function), 3) => {
-          let c = Box::new(arguments.pop().unwrap());
-          let b = Box::new(arguments.pop().unwrap());
-          let a = Box::new(arguments.pop().unwrap());
-          Ok(Thunk::Ternary {
-            function,
-            args: [a, b, c],
-            name,
-          })
-        }
-        (function, _) => Err(name.error(CompileErrorKind::FunctionArgumentCountMismatch {
-          function: name.lexeme(),
-          found: arguments.len(),
-          expected: function.argc(),
-        })),
-      },
-    )
+        })
+      }
+      (Function::Binary(function), 2) => {
+        let b = Box::new(arguments.pop().unwrap());
+        let a = Box::new(arguments.pop().unwrap());
+        Ok(Thunk::Binary {
+          function,
+          args: [a, b],
+          name,
+        })
+      }
+      (Function::BinaryPlus(function), 2..=usize::MAX) => {
+        let rest = arguments.drain(2..).collect();
+        let b = Box::new(arguments.pop().unwrap());
+        let a = Box::new(arguments.pop().unwrap());
+        Ok(Thunk::BinaryPlus {
+          function,
+          args: ([a, b], rest),
+          name,
+        })
+      }
+      (Function::Ternary(function), 3) => {
+        let c = Box::new(arguments.pop().unwrap());
+        let b = Box::new(arguments.pop().unwrap());
+        let a = Box::new(arguments.pop().unwrap());
+        Ok(Thunk::Ternary {
+          function,
+          args: [a, b, c],
+          name,
+        })
+      }
+      (function, _) => Err(name.error(CompileErrorKind::FunctionArgumentCountMismatch {
+        function: name.lexeme(),
+        found: arguments.len(),
+        expected: function.argc(),
+      })),
+    }
   }
 }
 

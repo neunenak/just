@@ -18,7 +18,7 @@ pub(crate) enum Function {
 }
 
 pub(crate) fn get(name: &str) -> Option<Function> {
-  let function = match name {
+  Some(match name {
     "absolute_path" => Unary(absolute_path),
     "arch" => Nullary(arch),
     "capitalize" => Unary(capitalize),
@@ -37,6 +37,7 @@ pub(crate) fn get(name: &str) -> Option<Function> {
     "justfile" => Nullary(justfile),
     "justfile_directory" => Nullary(justfile_directory),
     "kebabcase" => Unary(kebabcase),
+    "local_directory" => Nullary(local_directory),
     "lowercamelcase" => Unary(lowercamelcase),
     "lowercase" => Unary(lowercase),
     "num_cpus" => Nullary(num_cpus),
@@ -66,8 +67,7 @@ pub(crate) fn get(name: &str) -> Option<Function> {
     "uuid" => Nullary(uuid),
     "without_extension" => Unary(without_extension),
     _ => return None,
-  };
-  Some(function)
+  })
 }
 
 impl Function {
@@ -238,6 +238,25 @@ fn justfile(context: &FunctionContext) -> Result<String, String> {
       format!(
         "Justfile path is not valid unicode: {}",
         context.search.justfile.display()
+      )
+    })
+}
+
+fn local_directory(context: &FunctionContext) -> Result<String, String> {
+  let justfile_directory = context.search.justfile.parent().ok_or_else(|| {
+    format!(
+      "Could not resolve justfile directory. Justfile `{}` had no parent.",
+      context.search.justfile.display()
+    )
+  })?;
+
+  justfile_directory
+    .to_str()
+    .map(str::to_owned)
+    .ok_or_else(|| {
+      format!(
+        "Justfile directory is not valid unicode: {}",
+        justfile_directory.display()
       )
     })
 }

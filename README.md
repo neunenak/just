@@ -1155,9 +1155,16 @@ build:
 
 #### Justfile and Justfile Directory
 
-- `justfile()` - Retrieves the path of the current `justfile`.
+- `justfile()` - Retrieves the path of the current `justfile`, or the top-level justfile if this call appears
+in an included justfile.
 
 - `justfile_directory()` - Retrieves the path of the parent directory of the current `justfile`.
+
+- `local_justfile()` - If there are no includes, works the same way as `justfile()`. If called from an included
+justfile, it will give the path to the included justfile instead of the top-level one.
+
+- `local_directory()` - If there are no includes, works the same way as `justfile_directory()`. If called from
+an included justfile, it will give the path to the include's parent directory instead of the top-level one.
 
 For example, to run a command relative to the location of the current `justfile`:
 
