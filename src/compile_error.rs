@@ -35,7 +35,7 @@ impl Display for CompileError<'_> {
       AliasInvalidAttribute { alias, attr } => write!(
         f,
         "Alias {alias} has an invalid attribute `{}`",
-        attr.to_str(),
+        attr.to_string(),
       ),
       AliasShadowsRecipe { alias, recipe_line } => write!(
         f,
@@ -147,6 +147,13 @@ impl Display for CompileError<'_> {
         "Internal error, this may indicate a bug in just: {message}\n\
            consider filing an issue: https://github.com/casey/just/issues/new"
       ),
+      InvalidAttributeArgument { name, expected } => {
+        if *expected {
+          write!(f, "Attribute {name} requires an argument.")
+        } else {
+          write!(f, "Attribute {name} does not allow arguments.")
+        }
+      }
       InvalidEscapeSequence { character } => write!(
         f,
         "`\\{}` is not a valid escape sequence",

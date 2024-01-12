@@ -64,6 +64,10 @@ pub(crate) enum CompileErrorKind<'src> {
   Internal {
     message: String,
   },
+  InvalidAttributeArgument {
+    name: String,
+    expected: bool,
+  },
   InvalidEscapeSequence {
     character: char,
   },

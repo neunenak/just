@@ -26,6 +26,7 @@ pub(crate) struct Config {
   pub(crate) dotenv_path: Option<PathBuf>,
   pub(crate) dry_run: bool,
   pub(crate) dump_format: DumpFormat,
+  pub(crate) groups: bool,
   pub(crate) highlight: bool,
   pub(crate) invocation_directory: PathBuf,
   pub(crate) list_heading: String,
@@ -57,6 +58,7 @@ mod cmd {
   pub(crate) const SHOW: &str = "SHOW";
   pub(crate) const SUMMARY: &str = "SUMMARY";
   pub(crate) const VARIABLES: &str = "VARIABLES";
+  pub(crate) const GROUPS: &str = "GROUPS";
 
   pub(crate) const ALL: &[&str] = &[
     CHANGELOG,
@@ -369,6 +371,12 @@ impl Config {
           .help("List available recipes and their arguments"),
       )
       .arg(
+        Arg::with_name(cmd::GROUPS)
+        .short("g")
+        .long("groups")
+        .help("List recipe groups, or list recipes by group when used with -l")
+      )
+      .arg(
         Arg::with_name(cmd::SHOW)
           .short("s")
           .long("show")
@@ -591,6 +599,8 @@ impl Config {
       Subcommand::Init
     } else if matches.is_present(cmd::LIST) {
       Subcommand::List
+    } else if matches.is_present(cmd::GROUPS) {
+      Subcommand::Groups
     } else if let Some(name) = matches.value_of(cmd::SHOW) {
       Subcommand::Show {
         name: name.to_owned(),
@@ -647,6 +657,7 @@ impl Config {
       dotenv_path: matches.value_of(arg::DOTENV_PATH).map(PathBuf::from),
       dry_run: matches.is_present(arg::DRY_RUN),
       dump_format: Self::dump_format_from_matches(matches)?,
+      groups: matches.is_present(cmd::GROUPS),
       highlight: !matches.is_present(arg::NO_HIGHLIGHT),
       invocation_directory,
       list_heading: matches

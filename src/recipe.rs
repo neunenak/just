@@ -417,7 +417,7 @@ impl<'src, D: Display> ColorDisplay for Recipe<'src, D> {
     }
 
     for attribute in &self.attributes {
-      writeln!(f, "[{}]", attribute.to_str())?;
+      writeln!(f, "[{attribute}]")?;
     }
 
     if self.quiet {

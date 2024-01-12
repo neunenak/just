@@ -910,11 +910,29 @@ impl<'run, 'src> Parser<'run, 'src> {
     while self.accepted(BracketL)? {
       loop {
         let name = self.parse_name()?;
-        let attribute = Attribute::from_name(name).ok_or_else(|| {
+        let maybe_argument = if self.next_is(Colon) {
+          self.presume(Colon)?;
+          if self.next_is(StringToken) {
+            let s = self.parse_string_literal()?.cooked;
+            Some(s)
+          } else {
+            let name = self.parse_name()?;
+            Some(name.lexeme().to_string())
+          }
+        } else {
+          None
+        };
+
+        let attribute =
+          Attribute::parse(name.lexeme(), maybe_argument).map_err(|err| name.error(err))?;
+
+        /*
+        let attribute = Attribute::from_name_and_arg(name, maybe_argument).ok_or_else(|| {
           name.error(CompileErrorKind::UnknownAttribute {
             attribute: name.lexeme(),
           })
         })?;
+        */
         if let Some(line) = attributes.get(&attribute) {
           return Err(name.error(CompileErrorKind::DuplicateAttribute {
             attribute: name.lexeme(),
@@ -2063,6 +2081,18 @@ mod tests {
     name: optional_module_with_path,
     text: "mod? foo \"some/file/path.txt\"     \n",
     tree: (justfile (mod ? foo "some/file/path.txt")),
+  }
+
+  test! {
+    name: group_attribute,
+    text: "[group:mygroup]\nfoo:",
+    tree: (justfile (recipe foo)),
+  }
+
+  test! {
+    name: group_attribute_quoted,
+    text: "[group:\"my group\"]\nfoo:",
+    tree: (justfile (recipe foo)),
   }
 
   error! {
