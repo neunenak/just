@@ -24,7 +24,7 @@ impl<'src> Analyzer<'src> {
     root: &Path,
   ) -> CompileResult<'src, Justfile<'src>> {
     let mut recipes = Vec::new();
-    let mut aliases: BTreeMap<&str, Alias<'src, Name<'src>>> = BTreeMap::new();
+    let mut aliases = Vec::new();
 
     let mut assignments = Vec::new();
 
@@ -69,7 +69,7 @@ impl<'src> Analyzer<'src> {
           Item::Alias(alias) => {
             define(alias.name, "alias", false)?;
             Self::analyze_alias(alias)?;
-            aliases.insert(alias.name(), alias.clone());
+            aliases.push(alias.clone());
           }
           Item::Assignment(assignment) => {
             assignments.push(assignment);
@@ -142,7 +142,7 @@ impl<'src> Analyzer<'src> {
     let recipes = RecipeResolver::resolve_recipes(recipe_table, &self.assignments)?;
 
     let resolved_aliases = aliases
-      .into_values()
+      .into_iter()
       .map(|alias| {
         let resolved = Self::resolve_alias(&recipes, alias)?;
         Ok((resolved.name(), resolved))
