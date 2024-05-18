@@ -2,7 +2,7 @@ use {super::*, CompileErrorKind::*};
 
 #[derive(Default)]
 pub(crate) struct Analyzer<'src> {
-  assignments: Table<'src, Assignment<'src>>,
+  assignments: BTreeMap<&'src str, Assignment<'src>>,
   sets: BTreeMap<&'src str, Set<'src>>,
 }
 
@@ -107,7 +107,7 @@ impl<'src> Analyzer<'src> {
 
     let settings = Settings::from_setting_iter(self.sets.into_values().map(|set| set.value));
 
-    let mut recipe_table: Table<'src, UnresolvedRecipe<'src>> = Table::default();
+    let mut recipe_table: BTreeMap<&'src str, UnresolvedRecipe<'src>> = BTreeMap::new();
 
     for assignment in assignments {
       if !settings.allow_duplicate_variables
@@ -123,7 +123,7 @@ impl<'src> Analyzer<'src> {
         .get(assignment.name.lexeme())
         .map_or(true, |original| assignment.depth <= original.depth)
       {
-        self.assignments.insert(assignment.clone());
+        self.assignments.insert(assignment.name(), assignment.clone());
       }
     }
 
@@ -135,7 +135,7 @@ impl<'src> Analyzer<'src> {
         .get(recipe.name.lexeme())
         .map_or(true, |original| recipe.depth <= original.depth)
       {
-        recipe_table.insert(recipe.clone());
+        recipe_table.insert(recipe.name(), recipe.clone());
       }
     }
 
@@ -248,7 +248,7 @@ impl<'src> Analyzer<'src> {
   }
 
   fn resolve_alias(
-    recipes: &Table<'src, Rc<Recipe<'src>>>,
+    recipes: &BTreeMap<&'src str, Rc<Recipe<'src>>>,
     alias: Alias<'src, Name<'src>>,
   ) -> CompileResult<'src, Alias<'src>> {
     // Make sure the alias doesn't conflict with any recipe

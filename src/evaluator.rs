@@ -1,7 +1,7 @@
 use super::*;
 
 pub(crate) struct Evaluator<'src: 'run, 'run> {
-  pub(crate) assignments: Option<&'run Table<'src, Assignment<'src>>>,
+  pub(crate) assignments: Option<&'run BTreeMap<&'src str, Assignment<'src>>>,
   pub(crate) config: &'run Config,
   pub(crate) dotenv: &'run BTreeMap<String, String>,
   pub(crate) scope: Scope<'src, 'run>,
@@ -11,7 +11,7 @@ pub(crate) struct Evaluator<'src: 'run, 'run> {
 
 impl<'src, 'run> Evaluator<'src, 'run> {
   pub(crate) fn evaluate_assignments(
-    assignments: &'run Table<'src, Assignment<'src>>,
+    assignments: &'run BTreeMap<&'src str, Assignment<'src>>,
     config: &'run Config,
     dotenv: &'run BTreeMap<String, String>,
     overrides: Scope<'src, 'run>,

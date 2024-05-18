@@ -11,13 +11,13 @@ struct Invocation<'src: 'run, 'run> {
 #[derive(Debug, PartialEq, Serialize)]
 pub(crate) struct Justfile<'src> {
   pub(crate) aliases: BTreeMap<&'src str, Alias<'src>>,
-  pub(crate) assignments: Table<'src, Assignment<'src>>,
+  pub(crate) assignments: BTreeMap<&'src str, Assignment<'src>>,
   #[serde(rename = "first", serialize_with = "keyed::serialize_option")]
   pub(crate) default: Option<Rc<Recipe<'src>>>,
   #[serde(skip)]
   pub(crate) loaded: Vec<PathBuf>,
   pub(crate) modules: BTreeMap<String, Justfile<'src>>,
-  pub(crate) recipes: Table<'src, Rc<Recipe<'src>>>,
+  pub(crate) recipes: BTreeMap<&'src str, Rc<Recipe<'src>>>,
   pub(crate) settings: Settings<'src>,
   pub(crate) warnings: Vec<Warning>,
 }
@@ -87,7 +87,7 @@ impl<'src> Justfile<'src> {
     let mut unknown_overrides = Vec::new();
 
     for (name, value) in overrides {
-      if let Some(assignment) = self.assignments.get(name) {
+      if let Some(assignment) = self.assignments.get(name.as_str()) {
         scope.bind(assignment.export, assignment.name, value.clone());
       } else {
         unknown_overrides.push(name.clone());

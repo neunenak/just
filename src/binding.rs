@@ -13,8 +13,8 @@ pub(crate) struct Binding<'src, V = String> {
   pub(crate) value: V,
 }
 
-impl<'src, V> Keyed<'src> for Binding<'src, V> {
-  fn key(&self) -> &'src str {
+impl<'src, V> Binding<'src, V> {
+  pub(crate) fn name(&self) -> &'src str {
     self.name.lexeme()
   }
 }

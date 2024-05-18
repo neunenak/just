@@ -1,25 +1,38 @@
 use {super::*, CompileErrorKind::*};
 
 pub(crate) struct RecipeResolver<'src: 'run, 'run> {
-  unresolved_recipes: Table<'src, UnresolvedRecipe<'src>>,
-  resolved_recipes: Table<'src, Rc<Recipe<'src>>>,
-  assignments: &'run Table<'src, Assignment<'src>>,
+  unresolved_recipes: BTreeMap<&'src str, UnresolvedRecipe<'src>>,
+  resolved_recipes: BTreeMap<&'src str, Rc<Recipe<'src>>>,
+  assignments: &'run BTreeMap<&'src str, Assignment<'src>>,
 }
 
 impl<'src: 'run, 'run> RecipeResolver<'src, 'run> {
   pub(crate) fn resolve_recipes(
-    unresolved_recipes: Table<'src, UnresolvedRecipe<'src>>,
-    assignments: &'run Table<'src, Assignment<'src>>,
-  ) -> CompileResult<'src, Table<'src, Rc<Recipe<'src>>>> {
+    unresolved_recipes: BTreeMap<&'src str, UnresolvedRecipe<'src>>,
+    assignments: &'run BTreeMap<&'src str, Assignment<'src>>,
+  ) -> CompileResult<'src, BTreeMap<&'src str, Rc<Recipe<'src>>>> {
     let mut resolver = Self {
-      resolved_recipes: Table::new(),
+      resolved_recipes: BTreeMap::new(),
       unresolved_recipes,
       assignments,
     };
 
-    while let Some(unresolved) = resolver.unresolved_recipes.pop() {
+    loop {
+      let name = resolver.unresolved_recipes.keys().next().copied();
+      match name {
+        None => break,
+        Some(name) => {
+          let recipe = resolver.unresolved_recipes.remove(name).unwrap();
+          resolver.resolve_recipe(&mut Vec::new(), recipe)?;
+        }
+      }
+    }
+
+      /*
+    while let Some((_, unresolved)) = resolver.unresolved_recipes.into_iter().next() {
       resolver.resolve_recipe(&mut Vec::new(), unresolved)?;
     }
+      */
 
     for recipe in resolver.resolved_recipes.values() {
       for parameter in &recipe.parameters {
@@ -114,7 +127,7 @@ impl<'src: 'run, 'run> RecipeResolver<'src, 'run> {
     stack.pop();
 
     let resolved = Rc::new(recipe.resolve(dependencies)?);
-    self.resolved_recipes.insert(Rc::clone(&resolved));
+    self.resolved_recipes.insert(resolved.name(), Rc::clone(&resolved));
     Ok(resolved)
   }
 }
