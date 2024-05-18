@@ -4,7 +4,7 @@ use {super::*, CompileErrorKind::*};
 pub(crate) struct Analyzer<'src> {
   assignments: Table<'src, Assignment<'src>>,
   aliases: Table<'src, Alias<'src, Name<'src>>>,
-  sets: Table<'src, Set<'src>>,
+  sets: BTreeMap<&'src str, Set<'src>>,
 }
 
 impl<'src> Analyzer<'src> {
@@ -97,7 +97,7 @@ impl<'src> Analyzer<'src> {
           }
           Item::Set(set) => {
             self.analyze_set(set)?;
-            self.sets.insert(set.clone());
+            self.sets.insert(set.name(), set.clone());
           }
         }
       }
@@ -105,7 +105,7 @@ impl<'src> Analyzer<'src> {
       warnings.extend(ast.warnings.iter().cloned());
     }
 
-    let settings = Settings::from_setting_iter(self.sets.into_iter().map(|(_, set)| set.value));
+    let settings = Settings::from_setting_iter(self.sets.into_values().map(|set| set.value));
 
     let mut recipe_table: Table<'src, UnresolvedRecipe<'src>> = Table::default();
 
@@ -234,7 +234,7 @@ impl<'src> Analyzer<'src> {
   }
 
   fn analyze_set(&self, set: &Set<'src>) -> CompileResult<'src> {
-    if let Some(original) = self.sets.get(set.name.lexeme()) {
+    if let Some(original) = self.sets.get(set.name()) {
       return Err(set.name.error(DuplicateSet {
         setting: original.name.lexeme(),
         first: original.name.line,

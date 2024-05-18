@@ -6,8 +6,8 @@ pub(crate) struct Set<'src> {
   pub(crate) value: Setting<'src>,
 }
 
-impl<'src> Keyed<'src> for Set<'src> {
-  fn key(&self) -> &'src str {
+impl<'src> Set<'src> {
+  pub(crate) fn name(&self) -> &'src str {
     self.name.lexeme()
   }
 }
