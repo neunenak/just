@@ -3,7 +3,6 @@ use {super::*, CompileErrorKind::*};
 #[derive(Default)]
 pub(crate) struct Analyzer<'src> {
   assignments: Table<'src, Assignment<'src>>,
-  aliases: Table<'src, Alias<'src, Name<'src>>>,
   sets: BTreeMap<&'src str, Set<'src>>,
 }
 
@@ -25,6 +24,7 @@ impl<'src> Analyzer<'src> {
     root: &Path,
   ) -> CompileResult<'src, Justfile<'src>> {
     let mut recipes = Vec::new();
+    let mut aliases: BTreeMap<&str, Alias<'src, Name<'src>>> = BTreeMap::new();
 
     let mut assignments = Vec::new();
 
@@ -69,7 +69,7 @@ impl<'src> Analyzer<'src> {
           Item::Alias(alias) => {
             define(alias.name, "alias", false)?;
             Self::analyze_alias(alias)?;
-            self.aliases.insert(alias.clone());
+            aliases.insert(alias.name(), alias.clone());
           }
           Item::Assignment(assignment) => {
             assignments.push(assignment);
@@ -141,10 +141,13 @@ impl<'src> Analyzer<'src> {
 
     let recipes = RecipeResolver::resolve_recipes(recipe_table, &self.assignments)?;
 
-    let mut aliases = Table::new();
-    while let Some(alias) = self.aliases.pop() {
-      aliases.insert(Self::resolve_alias(&recipes, alias)?);
-    }
+    let resolved_aliases = aliases
+      .into_values()
+      .map(|alias| {
+        let resolved = Self::resolve_alias(&recipes, alias)?;
+        Ok((resolved.name(), resolved))
+      })
+      .collect::<CompileResult<'_, _>>()?;
 
     let root = paths.get(root).unwrap();
 
@@ -160,7 +163,7 @@ impl<'src> Analyzer<'src> {
             Rc::clone(next)
           }),
         }),
-      aliases,
+      aliases: resolved_aliases,
       assignments: self.assignments,
       loaded: loaded.into(),
       recipes,

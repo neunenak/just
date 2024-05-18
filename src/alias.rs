@@ -24,14 +24,12 @@ impl<'src> Alias<'src, Name<'src>> {
   }
 }
 
-impl Alias<'_> {
+impl<'src, T> Alias<'src, T> {
   pub(crate) fn is_private(&self) -> bool {
     self.name.lexeme().starts_with('_') || self.attributes.contains(&Attribute::Private)
   }
-}
 
-impl<'src, T> Keyed<'src> for Alias<'src, T> {
-  fn key(&self) -> &'src str {
+  pub(crate) fn name(&self) -> &'src str {
     self.name.lexeme()
   }
 }

@@ -10,7 +10,7 @@ struct Invocation<'src: 'run, 'run> {
 
 #[derive(Debug, PartialEq, Serialize)]
 pub(crate) struct Justfile<'src> {
-  pub(crate) aliases: Table<'src, Alias<'src>>,
+  pub(crate) aliases: BTreeMap<&'src str, Alias<'src>>,
   pub(crate) assignments: Table<'src, Assignment<'src>>,
   #[serde(rename = "first", serialize_with = "keyed::serialize_option")]
   pub(crate) default: Option<Rc<Recipe<'src>>>,
