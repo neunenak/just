@@ -162,6 +162,7 @@ mod output_error;
 mod parameter;
 mod parameter_kind;
 mod parser;
+mod peg;
 mod platform;
 mod platform_interface;
 mod position;
