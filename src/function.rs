@@ -59,6 +59,7 @@ pub(crate) fn get(name: &str) -> Option<Function> {
     "home_directory" => Nullary(|_| dir("home", dirs::home_dir)),
     "invocation_directory" => Nullary(invocation_directory),
     "invocation_directory_native" => Nullary(invocation_directory_native),
+    "is_dep" => Nullary(is_dep),
     "join" => BinaryPlus(join),
     "just_executable" => Nullary(just_executable),
     "just_pid" => Nullary(just_pid),
@@ -327,6 +328,11 @@ fn invocation_directory_native(context: Context) -> Result<String, String> {
         context.evaluator.config.invocation_directory.display()
       )
     })
+}
+
+fn is_dep(_context: Context) -> Result<String, String> {
+  let result = false;
+  Ok(result.to_string())
 }
 
 fn prepend(_context: Context, prefix: &str, s: &str) -> Result<String, String> {
