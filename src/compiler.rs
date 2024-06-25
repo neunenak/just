@@ -80,6 +80,7 @@ impl Compiler {
             absolute,
             optional,
             path,
+            attributes: _,
           } => {
             let import = current
               .path

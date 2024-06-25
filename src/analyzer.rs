@@ -81,7 +81,15 @@ impl<'src> Analyzer<'src> {
             assignments.push(assignment);
           }
           Item::Comment(_) => (),
-          Item::Import { absolute, .. } => {
+          Item::Import {
+            absolute,
+            attributes,
+            ..
+          } => {
+            //TODO check attributes for validity
+
+            let _groups = attributes.groups();
+
             if let Some(absolute) = absolute {
               stack.push(asts.get(absolute).unwrap());
             }
@@ -246,7 +254,7 @@ impl<'src> Analyzer<'src> {
   fn analyze_alias(alias: &Alias<'src, Name<'src>>) -> CompileResult<'src> {
     let name = alias.name.lexeme();
 
-    for attribute in &alias.attributes {
+    for attribute in &alias.attributes.inner {
       if *attribute != Attribute::Private {
         return Err(alias.name.token.error(AliasInvalidAttribute {
           alias: name,

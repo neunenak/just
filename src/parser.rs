@@ -334,7 +334,7 @@ impl<'run, 'src> Parser<'run, 'src> {
       } else if self.next_is(Identifier) {
         match Keyword::from_lexeme(next.lexeme()) {
           Some(Keyword::Alias) if self.next_are(&[Identifier, Identifier, ColonEquals]) => {
-            items.push(Item::Alias(self.parse_alias(BTreeSet::new())?));
+            items.push(Item::Alias(self.parse_alias(AttributeSet::empty())?));
           }
           Some(Keyword::Export) if self.next_are(&[Identifier, Identifier, ColonEquals]) => {
             self.presume_keyword(Keyword::Export)?;
@@ -354,15 +354,7 @@ impl<'run, 'src> Parser<'run, 'src> {
               || self.next_are(&[Identifier, Identifier, StringToken])
               || self.next_are(&[Identifier, QuestionMark]) =>
           {
-            self.presume_keyword(Keyword::Import)?;
-            let optional = self.accepted(QuestionMark)?;
-            let (path, relative) = self.parse_string_literal_token()?;
-            items.push(Item::Import {
-              absolute: None,
-              optional,
-              path,
-              relative,
-            });
+            items.push(self.parse_import(AttributeSet::empty())?);
           }
           Some(Keyword::Mod)
             if self.next_are(&[Identifier, Identifier, Comment])
@@ -412,7 +404,7 @@ impl<'run, 'src> Parser<'run, 'src> {
               items.push(Item::Recipe(self.parse_recipe(
                 doc,
                 false,
-                BTreeSet::new(),
+                AttributeSet::empty(),
               )?));
             }
           }
@@ -422,13 +414,20 @@ impl<'run, 'src> Parser<'run, 'src> {
         items.push(Item::Recipe(self.parse_recipe(
           doc,
           true,
-          BTreeSet::new(),
+          AttributeSet::empty(),
         )?));
       } else if let Some(attributes) = self.parse_attributes()? {
         let next_keyword = Keyword::from_lexeme(self.next()?.lexeme());
         match next_keyword {
           Some(Keyword::Alias) if self.next_are(&[Identifier, Identifier, ColonEquals]) => {
             items.push(Item::Alias(self.parse_alias(attributes)?));
+          }
+          Some(Keyword::Import)
+            if self.next_are(&[Identifier, StringToken])
+              || self.next_are(&[Identifier, Identifier, StringToken])
+              || self.next_are(&[Identifier, QuestionMark]) =>
+          {
+            items.push(self.parse_import(attributes)?);
           }
           _ => {
             let quiet = self.accepted(At)?;
@@ -454,10 +453,22 @@ impl<'run, 'src> Parser<'run, 'src> {
     }
   }
 
+  fn parse_import(&mut self, attributes: AttributeSet<'src>) -> CompileResult<'src, Item<'src>> {
+    self.presume_keyword(Keyword::Import)?;
+    let optional = self.accepted(QuestionMark)?;
+    let (path, relative) = self.parse_string_literal_token()?;
+    Ok(Item::Import {
+      absolute: None,
+      attributes,
+      optional,
+      path,
+      relative,
+    })
+  }
   /// Parse an alias, e.g `alias name := target`
   fn parse_alias(
     &mut self,
-    attributes: BTreeSet<Attribute<'src>>,
+    attributes: AttributeSet<'src>,
   ) -> CompileResult<'src, Alias<'src, Name<'src>>> {
     self.presume_keyword(Keyword::Alias)?;
     let name = self.parse_name()?;
@@ -749,7 +760,7 @@ impl<'run, 'src> Parser<'run, 'src> {
     &mut self,
     doc: Option<&'src str>,
     quiet: bool,
-    attributes: BTreeSet<Attribute<'src>>,
+    attributes: AttributeSet<'src>,
   ) -> CompileResult<'src, UnresolvedRecipe<'src>> {
     let name = self.parse_name()?;
 
@@ -811,7 +822,7 @@ impl<'run, 'src> Parser<'run, 'src> {
 
     Ok(Recipe {
       shebang: body.first().map_or(false, Line::is_shebang),
-      attributes,
+      attributes: attributes.to_btree_set(),
       body,
       dependencies,
       doc,
@@ -988,7 +999,7 @@ impl<'run, 'src> Parser<'run, 'src> {
   }
 
   /// Parse recipe attributes
-  fn parse_attributes(&mut self) -> CompileResult<'src, Option<BTreeSet<Attribute<'src>>>> {
+  fn parse_attributes(&mut self) -> CompileResult<'src, Option<AttributeSet<'src>>> {
     let mut attributes = BTreeMap::new();
 
     while self.accepted(BracketL)? {
@@ -1028,7 +1039,7 @@ impl<'run, 'src> Parser<'run, 'src> {
     if attributes.is_empty() {
       Ok(None)
     } else {
-      Ok(Some(attributes.into_keys().collect()))
+      Ok(Some(AttributeSet::from_map(attributes)))
     }
   }
 }

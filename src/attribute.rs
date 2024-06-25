@@ -120,6 +120,49 @@ impl<'src> Display for Attribute<'src> {
   }
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub(crate) struct AttributeSet<'src> {
+  #[serde(flatten)]
+  pub(crate) inner: BTreeSet<Attribute<'src>>,
+}
+
+impl<'src> AttributeSet<'src> {
+  pub(crate) fn empty() -> Self {
+    Self {
+      inner: BTreeSet::new(),
+    }
+  }
+
+  pub(crate) fn from_map<T>(input: BTreeMap<Attribute<'src>, T>) -> Self {
+    Self {
+      inner: input.into_keys().collect(),
+    }
+  }
+
+  pub(crate) fn to_btree_set(self) -> BTreeSet<Attribute<'src>> {
+    self.inner
+  }
+
+  pub(crate) fn contains(&self, attribute: &Attribute) -> bool {
+    self.inner.contains(attribute)
+  }
+
+  /// Get the names of all Group attributes defined in this attribute set
+  pub(crate) fn groups(&self) -> Vec<&StringLiteral<'src>> {
+    self
+      .inner
+      .iter()
+      .filter_map(|attr| {
+        if let Attribute::Group(name) = attr {
+          Some(name)
+        } else {
+          None
+        }
+      })
+      .collect()
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

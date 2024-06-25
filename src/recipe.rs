@@ -19,6 +19,7 @@ fn error_from_signal(recipe: &str, line_number: Option<usize>, exit_status: Exit
 /// A recipe, e.g. `foo: bar baz`
 #[derive(PartialEq, Debug, Clone, Serialize)]
 pub(crate) struct Recipe<'src, D = Dependency<'src>> {
+  //TODO make this be attributeset too
   pub(crate) attributes: BTreeSet<Attribute<'src>>,
   pub(crate) body: Vec<Line<'src>>,
   pub(crate) dependencies: Vec<D>,

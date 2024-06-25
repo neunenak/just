@@ -7,6 +7,7 @@ pub(crate) enum Item<'src> {
   Assignment(Assignment<'src>),
   Comment(&'src str),
   Import {
+    attributes: AttributeSet<'src>,
     absolute: Option<PathBuf>,
     optional: bool,
     path: Token<'src>,
