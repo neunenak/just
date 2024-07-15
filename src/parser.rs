@@ -460,7 +460,7 @@ impl<'run, 'src> Parser<'run, 'src> {
   /// Parse an alias, e.g `alias name := target`
   fn parse_alias(
     &mut self,
-    attributes: BTreeSet<Attribute<'src>>,
+    attributes: AttributeSet<'src>,
   ) -> CompileResult<'src, Alias<'src, Name<'src>>> {
     self.presume_keyword(Keyword::Alias)?;
     let name = self.parse_name()?;
