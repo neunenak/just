@@ -39,7 +39,7 @@ impl Search {
     invocation_directory: &Path,
   ) -> SearchResult<Self> {
     match search_config {
-      SearchConfig::FromInvocationDirectory => Self::find_next(invocation_directory),
+      SearchConfig::FromInvocationDirectory => Self::find_from_directory(invocation_directory),
       SearchConfig::FromSearchDirectory { search_directory } => {
         let search_directory = Self::clean(invocation_directory, search_directory);
         let justfile = Self::justfile(&search_directory)?;
@@ -75,7 +75,18 @@ impl Search {
     }
   }
 
-  pub(crate) fn find_next(starting_dir: &Path) -> SearchResult<Self> {
+  pub(crate) fn search_parent(&self) -> SearchResult<Self> {
+    let parent_dir = self
+      .justfile
+      .parent()
+      .and_then(|p| p.parent())
+      .ok_or_else(|| SearchError::JustfileHadNoParent {
+        path: self.justfile.clone(),
+      })?;
+    Self::find_from_directory(parent_dir)
+  }
+
+  fn find_from_directory(starting_dir: &Path) -> SearchResult<Self> {
     let justfile = Self::justfile(starting_dir)?;
     let working_directory = Self::working_directory_from_justfile(&justfile)?;
     Ok(Self {
