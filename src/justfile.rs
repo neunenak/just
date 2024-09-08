@@ -1,4 +1,4 @@
-use {super::*, serde::Serialize};
+use {super::*, argument_parser::ArgumentGroup, serde::Serialize};
 
 #[derive(Debug)]
 struct Invocation<'src: 'run, 'run> {
@@ -179,11 +179,10 @@ impl<'src> Justfile<'src> {
     for group in &groups {
       invocations.push(self.invocation(
         &arena,
-        &group.arguments,
+        group,
         config,
         &dotenv,
         &scope,
-        &group.path,
         0,
         &mut scopes,
         search,
@@ -244,15 +243,17 @@ impl<'src> Justfile<'src> {
   fn invocation<'run>(
     &'run self,
     arena: &'run Arena<Scope<'src, 'run>>,
-    arguments: &[&'run str],
+    argument_group: &'run ArgumentGroup<'run>,
     config: &'run Config,
     dotenv: &'run BTreeMap<String, String>,
     parent: &'run Scope<'src, 'run>,
-    path: &'run [String],
     position: usize,
     scopes: &mut BTreeMap<&'run [String], &'run Scope<'src, 'run>>,
     search: &'run Search,
   ) -> RunResult<'src, Invocation<'src, 'run>> {
+    let path: &'run [String] = &argument_group.path;
+    let arguments: &[&'run str] = &argument_group.arguments;
+
     if position + 1 == path.len() {
       let recipe = self.get_recipe(&path[position]).unwrap();
       Ok(Invocation {
@@ -282,11 +283,10 @@ impl<'src> Justfile<'src> {
 
       module.invocation(
         arena,
-        arguments,
+        argument_group,
         config,
         dotenv,
         scope,
-        path,
         position + 1,
         scopes,
         search,
