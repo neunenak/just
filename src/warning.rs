@@ -1,16 +1,20 @@
 use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) enum Warning {}
+pub(crate) enum Warning<'src> {
+  TransposedShebang { token: Token<'src> },
+}
 
-impl Warning {
+impl<'src> Warning<'src> {
   #[allow(clippy::unused_self)]
   fn context(&self) -> Option<&Token> {
-    None
+    match self {
+      Warning::TransposedShebang { token } => Some(token),
+    }
   }
 }
 
-impl ColorDisplay for Warning {
+impl<'src> ColorDisplay for Warning<'src> {
   fn fmt(&self, f: &mut Formatter, color: Color) -> fmt::Result {
     let warning = color.warning();
     let message = color.message();
@@ -28,7 +32,7 @@ impl ColorDisplay for Warning {
   }
 }
 
-impl Serialize for Warning {
+impl<'src> Serialize for Warning<'src> {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: Serializer,

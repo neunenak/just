@@ -319,7 +319,7 @@ impl<'src> Node<'src> for Set<'src> {
   }
 }
 
-impl<'src> Node<'src> for Warning {
+impl<'src> Node<'src> for Warning<'src> {
   fn tree(&self) -> Tree<'src> {
     unreachable!()
   }

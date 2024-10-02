@@ -6,7 +6,7 @@ use super::*;
 #[derive(Debug, Clone)]
 pub(crate) struct Ast<'src> {
   pub(crate) items: Vec<Item<'src>>,
-  pub(crate) warnings: Vec<Warning>,
+  pub(crate) warnings: Vec<Warning<'src>>,
   pub(crate) working_directory: PathBuf,
 }
 

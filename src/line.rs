@@ -35,6 +35,13 @@ impl<'src> Line<'src> {
     )
   }
 
+  pub(crate) fn transposed_shebang(&self) -> Option<&Token<'src>> {
+    match self.fragments.first() {
+      Some(Fragment::Text { token }) if token.lexeme().starts_with("!#") => Some(token),
+      _ => None,
+    }
+  }
+
   pub(crate) fn is_quiet(&self) -> bool {
     matches!(
       self.fragments.first(),

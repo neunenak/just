@@ -32,6 +32,7 @@ pub(crate) struct Parser<'run, 'src> {
   next_token: usize,
   recursion_depth: usize,
   tokens: &'run [Token<'src>],
+  warnings: Vec<Warning<'src>>,
   working_directory: &'run Path,
 }
 
@@ -54,6 +55,7 @@ impl<'run, 'src> Parser<'run, 'src> {
       next_token: 0,
       recursion_depth: 0,
       tokens,
+      warnings: Vec::new(),
       working_directory,
     }
     .parse_ast()
@@ -448,7 +450,7 @@ impl<'run, 'src> Parser<'run, 'src> {
     if self.next_token == self.tokens.len() {
       Ok(Ast {
         items,
-        warnings: Vec::new(),
+        warnings: self.warnings,
         working_directory: self.working_directory.into(),
       })
     } else {
@@ -878,6 +880,12 @@ impl<'run, 'src> Parser<'run, 'src> {
     let body = self.parse_body()?;
 
     let shebang = body.first().map_or(false, Line::is_shebang);
+    if let Some(token) = body.first().and_then(Line::transposed_shebang) {
+      self
+        .warnings
+        .push(Warning::TransposedShebang { token: *token });
+    }
+
     let script = attributes
       .iter()
       .any(|attribute| matches!(attribute, Attribute::Script(_)));

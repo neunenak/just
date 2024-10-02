@@ -28,7 +28,7 @@ pub(crate) struct Justfile<'src> {
   pub(crate) unexports: HashSet<String>,
   #[serde(skip)]
   pub(crate) unstable_features: BTreeSet<UnstableFeature>,
-  pub(crate) warnings: Vec<Warning>,
+  pub(crate) warnings: Vec<Warning<'src>>,
   #[serde(skip)]
   pub(crate) working_directory: PathBuf,
 }
